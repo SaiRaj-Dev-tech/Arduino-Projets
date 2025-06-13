@@ -26,7 +26,7 @@ speech_thread.start()
 # ========== Arduino Setup ==========
 port = 'COM10'  # Change to your Arduino port
 board = pyfirmata2.Arduino(port)
-print("✅ SUCCESS: Arduino connected")
+print("SUCCESS: Arduino connected")
 
 # Motor A (Left)
 in1_pin = 8
@@ -49,7 +49,7 @@ board.digital[enb_pin].mode = pyfirmata2.PWM
 default_speed = 0.1
 board.digital[ena_pin].write(default_speed)
 board.digital[enb_pin].write(default_speed)
-print(f"⚙️ Motor speed set to {int(default_speed * 100)}%")
+print(f"Motor speed set to {int(default_speed * 100)}%")
 
 motor_state = "stopped"
 
@@ -66,7 +66,7 @@ def motor_forward():
         board.digital[enb_pin].write(default_speed)
 
         motor_state = "forward"
-        print("➡️ Motors running forward")
+        print(" Motors running forward")
         speech_queue.put("Motors running forward")
 
 def motor_backward():
@@ -81,7 +81,7 @@ def motor_backward():
         board.digital[enb_pin].write(default_speed)
 
         motor_state = "backward"
-        print("⬅️ Motors running backward")
+        print("Motors running backward")
         speech_queue.put("Motors running backward")
 
 def motor_stop():
@@ -96,12 +96,12 @@ def motor_stop():
         board.digital[enb_pin].write(0)
 
         motor_state = "stopped"
-        print("⏹️ Motors stopped")
+        print("Motors stopped")
         speech_queue.put("Motors stopped")
 
 # ========== Text Command Mode ==========
 def text_command_mode():
-    print("📝 Text Command Mode Activated!")
+    print("Text Command Mode Activated!")
     while True:
         cmd = input("Enter 'f'=forward, 'b'=backward, 's'=stop, 'e'=exit: ").strip().lower()
         if cmd == 'f':
@@ -112,24 +112,24 @@ def text_command_mode():
             motor_stop()
         elif cmd == 'e':
             motor_stop()
-            print("👋 Exiting text mode...")
+            print("Exiting text mode...")
             break
         else:
-            print("❌ Invalid command. Try again.")
+            print("Invalid command. Try again.")
 
 # ========== Gesture Control Mode ==========
 def gesture_control_mode():
-    print("🤖 Gesture Control Mode Activated!")
+    print("Gesture Control Mode Activated!")
     mp_hands = mp.solutions.hands
     hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.7)
     mp_drawing = mp.solutions.drawing_utils
 
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
-        print("❌ Camera not detected")
+        print("Camera not detected")
         return
 
-    print("👉 Index = Forward | Middle = Backward | Ring = Stop | 'q' to Quit")
+    print("Index = Forward | Middle = Backward | Ring = Stop | 'q' to Quit")
 
     try:
         while True:
@@ -169,7 +169,7 @@ def gesture_control_mode():
                 motor_stop()
                 break
     except Exception as e:
-        print(f"⚠️ Error: {e}")
+        print(f" Error: {e}")
     finally:
         cap.release()
         cv2.destroyAllWindows()
@@ -177,23 +177,23 @@ def gesture_control_mode():
 
 # ========== Voice Command Mode ==========
 def voice_command_mode():
-    print("🎙️ Voice Command Mode Activated!")
+    print(" Voice Command Mode Activated!")
     recognizer = sr.Recognizer()
     mic = sr.Microphone()
 
-    print("🎤 Say commands: 'go forward', 'go backward', 'stop', 'exit'")
+    print("Say commands: 'go forward', 'go backward', 'stop', 'exit'")
     with mic as source:
         recognizer.adjust_for_ambient_noise(source)
 
     try:
         while True:
             with mic as source:
-                print("🎧 Listening...")
+                print("Listening...")
                 audio = recognizer.listen(source)
 
             try:
                 command = recognizer.recognize_google(audio).lower()
-                print(f"🗣️ You said: {command}")
+                print(f"You said: {command}")
 
                 if "forward" in command:
                     motor_forward()
@@ -203,23 +203,23 @@ def voice_command_mode():
                     motor_stop()
                 elif "exit" in command:
                     motor_stop()
-                    print("👋 Exiting voice command mode...")
+                    print("Exiting voice command mode...")
                     break
                 else:
-                    print("❌ Unrecognized command")
+                    print("Unrecognized command")
 
             except sr.UnknownValueError:
-                print("❓ Could not understand audio")
+                print("Could not understand audio")
             except sr.RequestError:
-                print("⚠️ Speech recognition service error")
+                print("Speech recognition service error")
 
     except KeyboardInterrupt:
-        print("⏹️ Voice mode manually interrupted.")
+        print(" Voice mode manually interrupted.")
 
 # ========== Main ==========
 def main():
     try:
-        print("💡 Select Control Mode:")
+        print("Select Control Mode:")
         print("1. Text Command Mode")
         print("2. Gesture Control Mode")
         print("3. Voice Command Mode")
@@ -232,14 +232,14 @@ def main():
         elif choice == '3':
             voice_command_mode()
         else:
-            print("❌ Invalid choice. Exiting...")
+            print("Invalid choice. Exiting...")
 
     finally:
         motor_stop()
         speech_queue.put("EXIT")
         speech_thread.join(timeout=3)
         board.exit()
-        print("✅ Clean exit completed.")
+        print("Clean exit completed.")
 
 if __name__ == "__main__":
     main()
